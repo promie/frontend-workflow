@@ -4,7 +4,7 @@ import './App.css'
 const App: FC = () => {
   return (
     <div className="App">
-      <h1>Frontend Workflow</h1>
+      <h1 className='text-3xl font-bold underline text-blue-500'>Frontend Workflow</h1>
     </div>
   )
 }
