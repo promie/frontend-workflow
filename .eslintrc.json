@@ -38,6 +38,7 @@
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/no-use-before-define": 0,
     "react/prop-types": 0,
+    "react/react-in-jsx-scope": "off",
     "no-undef": "error",
     "@typescript-eslint/ban-ts-comment": ["error", {
       "ts-ignore": "allow-with-description"
