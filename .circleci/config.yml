@@ -1,6 +1,6 @@
 version: 2.1
 
-executor:
+executors:
   app-executor:
     docker:
       - image: circleci/node:17.2.0
@@ -101,5 +101,3 @@ workflows:
                 - develop
                 - staging
                 - main
-
-
