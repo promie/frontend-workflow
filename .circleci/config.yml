@@ -1,0 +1,105 @@
+version: 2.1
+
+executor:
+  app-executor:
+    docker:
+      - image: circleci/node:17.2.0
+    working_directory: ~/repo
+
+aliases:
+  - &show-current-branch
+    run:
+      name: Show current branch
+      command: echo "Current branch is $CIRCLE_BRANCH"
+  - &restore-cache
+    restore_cache:
+      keys:
+        - app-{{ checksum "package-lock.json" }}
+        - app-
+  - &install-dependencies
+    run:
+      name: Install dependencies
+      command: npm install
+  - &save-cache
+    save_cache:
+      paths:
+        - node_modules
+      key: app-{{ checksum "package-lock.json" }}
+
+jobs:
+  build:
+    executor: app-executor
+    steps:
+      - checkout
+      - *show-current-branch
+      - *restore-cache
+      - *install-dependencies
+      - *save-cache
+
+  linting:
+    executor: app-executor
+    steps:
+      - checkout
+      - *show-current-branch
+      - *restore-cache
+      - run:
+          name: Linting
+          command: npm run lint
+
+  prettier:
+    executor: app-executor
+    steps:
+      - checkout
+      - *show-current-branch
+      - *restore-cache
+      - run:
+          name: Run prettier check
+          command: npm run prettier:check
+
+  test:
+    executor: app-executor
+    steps:
+      - checkout
+      - *show-current-branch
+      - *restore-cache
+      - run:
+          name: Run unit tests
+          command: npm run test
+
+workflows:
+  build-and-deploy:
+    jobs:
+      - build
+
+      - linting:
+          requires:
+            - build
+          filters:
+            only:
+              - develop
+              - staging
+              - main
+              - FW-07-circle-ci-config
+
+      - prettier:
+          requires:
+            - build
+          filters:
+            only:
+              - develop
+              - staging
+              - main
+              - FW-07-circle-ci-config
+
+      - test:
+          requires:
+            - linting
+            - prettier
+          filters:
+            only:
+              - develop
+              - staging
+              - main
+              - FW-07-circle-ci-config
+
+
