@@ -80,7 +80,6 @@ workflows:
                 - develop
                 - staging
                 - main
-                - FW-07-circle-ci-config
 
       - prettier:
           requires:
@@ -91,7 +90,6 @@ workflows:
                 - develop
                 - staging
                 - main
-                - FW-07-circle-ci-config
 
       - test:
           requires:
@@ -103,4 +101,3 @@ workflows:
                 - develop
                 - staging
                 - main
-                - FW-07-circle-ci-config
