@@ -75,31 +75,31 @@ workflows:
           requires:
             - build
           filters:
-            only:
-              - develop
-              - staging
-              - main
-              - FW-07-circle-ci-config
+            branches:
+              only:
+                - develop
+                - staging
+                - main
 
       - prettier:
           requires:
             - build
           filters:
-            only:
-              - develop
-              - staging
-              - main
-              - FW-07-circle-ci-config
+            branches:
+              only:
+                - develop
+                - staging
+                - main
 
       - test:
           requires:
             - linting
             - prettier
           filters:
-            only:
-              - develop
-              - staging
-              - main
-              - FW-07-circle-ci-config
+            branches:
+              only:
+                - develop
+                - staging
+                - main
 
 
