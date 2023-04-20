@@ -50,7 +50,7 @@ $ npm run test
 
 ## Provisioning Terraform Locally
 To provision the S3 bucket and Cloudfront distribution locally using Terraform, navigate to the Terraform directory and run the following command.
-Ensure that you have configured your AWS credentials in the ~/.aws/credentials file and have Terraform installed on your local machine.
+Ensure that you have configured your AWS credentials in the `~/.aws/credentials` file and have Terraform installed on your local machine.
 
 Navigate to the terraform directory:
 
