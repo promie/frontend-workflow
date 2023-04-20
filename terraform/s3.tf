@@ -3,7 +3,7 @@
 ###########################
 
 resource "aws_s3_bucket" "frontend_workflow_s3_bucket" {
-  bucket = "${local.prefix}-app"
+  bucket        = "${local.prefix}-app"
   force_destroy = true
 
   tags = local.common_tags
@@ -11,15 +11,15 @@ resource "aws_s3_bucket" "frontend_workflow_s3_bucket" {
 
 resource "aws_s3_bucket_acl" "frontend_workflow_s3_bucket_acl" {
   bucket = aws_s3_bucket.frontend_workflow_s3_bucket.id
-  acl = "private"
+  acl    = "private"
 }
 
 resource "aws_s3_bucket_public_access_block" "frontend_workflow_s3_bucket_public_access_block" {
   bucket = aws_s3_bucket.frontend_workflow_s3_bucket.id
 
-  block_public_acls = true
-  block_public_policy = true
-  ignore_public_acls = true
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
   restrict_public_buckets = true
 }
 
@@ -39,11 +39,11 @@ resource "aws_s3_bucket_website_configuration" "frontend_workflow_s3_bucket_webs
   bucket = aws_s3_bucket.frontend_workflow_s3_bucket.id
 
   index_document {
-    suffix = 'index.html'
+    suffix = "index.html"
   }
 
   error_document {
-    key = 'index.html'
+    key = "index.html"
   }
 }
 
@@ -52,12 +52,12 @@ data "aws_iam_policy_document" "frontend_workflow_s3_bucket_policy_document" {
     actions = ["s3:GetObject"]
 
     resources = [
-      aws_s3_bucket.frontend_workflow_s3_bucket,
+      aws_s3_bucket.frontend_workflow_s3_bucket.arn,
       "${aws_s3_bucket.frontend_workflow_s3_bucket.arn}/*"
     ]
 
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = [aws_cloudfront_origin_access_identity.frontend_workflow_cloudfront_origin_access_identity.iam_arn]
     }
   }
