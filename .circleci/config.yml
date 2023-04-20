@@ -146,7 +146,6 @@ workflows:
                 - develop
                 - staging
                 - main
-                - FW-16-terraform-pipeline
 
       - prettier:
           requires:
@@ -157,7 +156,6 @@ workflows:
                 - develop
                 - staging
                 - main
-                - FW-16-terraform-pipeline
 
       - test:
           requires:
@@ -169,7 +167,6 @@ workflows:
                 - develop
                 - staging
                 - main
-                - FW-16-terraform-pipeline
 
 
       - terraform-validate:
@@ -181,7 +178,6 @@ workflows:
                 - develop
                 - staging
                 - main
-                - FW-16-terraform-pipeline
 
       - terraform-plan-and-apply:
           requires:
@@ -192,7 +188,6 @@ workflows:
                 - develop
                 - staging
                 - main
-                - FW-16-terraform-pipeline
 
       - hold:
           type: approval
@@ -208,4 +203,3 @@ workflows:
                 - develop
                 - staging
                 - main
-                - FW-16-terraform-pipeline
