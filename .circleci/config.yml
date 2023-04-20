@@ -167,13 +167,13 @@ workflows:
                 - FW-16-terraform-pipeline
 
       - terraform-plan-and-apply:
-            requires:
-                - terraform-validate
-            filters:
-                branches:
-                only:
-                    - develop
-                    - staging
-                    - main
-                    - FW-16-terraform-pipeline
+          requires:
+            - terraform-validate
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - main
+                - FW-16-terraform-pipeline
 
