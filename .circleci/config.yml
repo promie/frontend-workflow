@@ -5,6 +5,9 @@ executors:
     docker:
       - image: circleci/node:17.2.0
     working_directory: ~/repo
+  terraform-executor:
+    docker:
+      - image: hashicorp/terraform:1.4
 
 aliases:
   - &show-current-branch
@@ -35,6 +38,13 @@ jobs:
       - *restore-cache
       - *install-dependencies
       - *save-cache
+      - run:
+          name: Copy Terraform Folder
+          command: cp -r terraform artifacts/terraform
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - artifacts
 
   linting:
     executor: app-executor
@@ -66,6 +76,45 @@ jobs:
           name: Run unit tests
           command: npm run test
 
+  terraform-validate:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - *show-current-branch
+      - run:
+          name: Terraform validate & Format
+          command: |
+            cd terraform
+            terraform init -backend=false
+            terraform validate
+            terraform fmt -check
+
+  terraform-plan-and-apply:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch
+      - run:
+          name: Terraform Plan
+          command: |
+            cd artifacts/terraform
+            terraform workspace select $CIRCLE_BRANCH || terraform workspace new $CIRCLE_BRANCH
+            terraform plan
+      - run:
+          name: Terraform Apply
+          command: |
+            cd artifacts/terraform
+            terraform workspace select $CIRCLE_BRANCH
+            terraform apply --auto-approve
+            terraform output frontend_workflow_bucket_name > ../frontend_workflow_bucket_name.txt
+            terraform output cloudfront_distribution_id > ../cloudfront_distribution_id.txt
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - artifacts
+
 workflows:
   build-and-deploy:
     jobs:
@@ -80,6 +129,7 @@ workflows:
                 - develop
                 - staging
                 - main
+                - FW-16-terraform-pipeline
 
       - prettier:
           requires:
@@ -90,6 +140,7 @@ workflows:
                 - develop
                 - staging
                 - main
+                - FW-16-terraform-pipeline
 
       - test:
           requires:
@@ -101,3 +152,28 @@ workflows:
                 - develop
                 - staging
                 - main
+                - FW-16-terraform-pipeline
+
+
+      - terraform-validate:
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - main
+                - FW-16-terraform-pipeline
+
+      - terraform-plan-and-apply:
+            requires:
+                - terraform-validate
+            filters:
+                branches:
+                only:
+                    - develop
+                    - staging
+                    - main
+                    - FW-16-terraform-pipeline
+
