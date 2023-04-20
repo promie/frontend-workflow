@@ -19,4 +19,82 @@ Terraform code to create the S3 bucket and Cloudfront distribution, deploys the 
 
 The workflow diagram offers a clear visual representation of how the various tools are connected and how they work together to achieve the final deployment.
 
+## Requirements
+- Node 18.16.0 LTS
+- NPM 8.x
+- Circle CI account
+- Terraform 1.x.x
+- AWS account (Key Access and Secret Access)
+
+## Installation
+
+```bash
+$ npm install
+```
+
+## How to run
+### Local
+To run the app in development mode locally, run the below command on the root directory:
+
+```bash
+$ npm run dev
+```
+A react app will up on on `http://localhost:3000/`.
+
+## How to run tests
+To run the tests, run the below command on the root directory:
+
+```bash
+$ npm run test
+```
+
+## Provisioning Terraform Locally
+To provision the S3 bucket and Cloudfront distribution locally using Terraform, navigate to the Terraform directory and run the following command.
+Ensure that you have configured your AWS credentials in the ~/.aws/credentials file and have Terraform installed on your local machine.
+
+Navigate to the terraform directory:
+
+```bash
+$ cd terraform
+```
+
+Initialize the terraform:
+
+```bash
+$ terraform init
+```
+
+Format the terraform code:
+
+```bash
+$ terraform fmt
+```
+
+Validate the terraform code:
+
+```bash
+$ terraform validate
+```
+
+Plan the terraform code:
+
+```bash
+$ terraform plan
+```
+
+Apply the terraform code (after the apply the S3 bucket and Cloudfront distribution will be created):
+
+```bash
+$ terraform apply
+```
+
+Destroy the terraform code (after the destroy the S3 bucket and Cloudfront distribution will be deleted)
+
+```bash
+$ terraform destroy
+```
+
+
+
+
 
