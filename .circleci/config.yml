@@ -102,6 +102,7 @@ jobs:
           name: Terraform Plan
           command: |
             cd artifacts/terraform
+            terraform init
             terraform workspace select $CIRCLE_BRANCH || terraform workspace new $CIRCLE_BRANCH
             terraform plan
       - run:
@@ -116,6 +117,20 @@ jobs:
           root: ./
           paths:
             - artifacts
+
+  terraform-destroy:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch
+      - run:
+          name: Terraform Destroy
+          command: |
+            cd artifacts/terraform
+            terraform workspace select $CIRCLE_BRANCH || terraform workspace new $CIRCLE_BRANCH
+            terraform destroy --auto-approve
 
 workflows:
   build-and-deploy:
@@ -179,3 +194,18 @@ workflows:
                 - main
                 - FW-16-terraform-pipeline
 
+      - hold:
+          type: approval
+          requires:
+            - terraform-plan-and-apply
+
+      - terraform-destroy:
+          requires:
+            - hold
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - main
+                - FW-16-terraform-pipeline
