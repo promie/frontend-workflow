@@ -143,6 +143,7 @@ jobs:
           at: ./
       - *show-current-branch
       - *install-aws-cli
+      - *build-project
       - run:
           name: Deploy to AWS S3
           command: |
@@ -278,7 +279,7 @@ workflows:
       - hold:
           type: approval
           requires:
-            - terraform-plan-and-apply
+            - deploy-to-aws-cloudfront
 
       - terraform-destroy:
           requires:
