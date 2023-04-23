@@ -30,6 +30,22 @@ aliases:
       paths:
         - node_modules
       key: app-{{ checksum "package-lock.json" }}
+  - &install-aws-cli
+    run:
+      name: Installing AWS CLI
+      working_directory: /
+      command: |
+        sudo apt-get update -y -qq
+        sudo apt-get install -y awscli python3-pip python-dev build-essential
+  - &build-project
+    run:
+      name: Build project
+      command: |
+        npm install
+        npm run build
+        cd build
+        zip ../build.zip -r *.[^.]*
+        echo "Build Successful"
 
 jobs:
   build:
@@ -118,6 +134,56 @@ jobs:
           paths:
             - artifacts
 
+  deploy-to-aws-s3:
+    executor: app-executor
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch
+      - *install-aws-cli
+      - run:
+          name: Deploy to AWS S3
+          command: |
+            AWS_BUCKET_NAME=$(cat artifacts/frontend_workflow_bucket_name.txt | sed 's/\"//g')
+            echo "AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}"
+            if [ "${CIRCLE_BRANCH}" == "main" ]
+            then
+              aws --region ${AWS_REGION} s3 sync ~/repo/build s3://${AWS_BUCKET_NAME}/ --delete
+            elif [ "${CIRCLE_BRANCH}" == "staging" ]
+            then
+              aws --region ${AWS_REGION} s3 sync ~/repo/build s3://${AWS_BUCKET_NAME}/ --delete
+            else
+              aws --region ${AWS_REGION} s3 sync ~/repo/build s3://${AWS_BUCKET_NAME}/ --delete
+            fi
+
+  deploy-to-aws-cloudfront:
+    executor: app-executor
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch
+      - *install-aws-cli
+      - *build-project
+      - run:
+          name: Deploy to AWS Cloudfront
+          command: |
+            CLOUDFRONT_DISTRIBUTION_ID=$(cat artifacts/cloudfront_distribution_id.txt | sed 's/\"//g')
+            echo "CLOUDFRONT_DISTRIBUTION_ID: ${CLOUDFRONT_DISTRIBUTION_ID}"
+            aws configure set preview.cloudfront true
+            if [ "${CIRCLE_BRANCH}" == "main" ]
+            then
+              aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_DISTRIBUTION_ID} --paths "/*"
+            elif [ "${CIRCLE_BRANCH}" == "staging" ]
+            then
+              aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_DISTRIBUTION_ID} --paths "/*"
+            else
+              aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_DISTRIBUTION_ID} --paths "/*"
+            fi
+
   terraform-destroy:
     executor: terraform-executor
     steps:
@@ -182,6 +248,26 @@ workflows:
       - terraform-plan-and-apply:
           requires:
             - terraform-validate
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - main
+
+      - deploy-to-aws-s3:
+          requires:
+            - terraform-plan-and-apply
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - main
+
+      - deploy-to-aws-cloudfront:
+          requires:
+            - deploy-to-aws-s3
           filters:
             branches:
               only:
